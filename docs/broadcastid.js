@@ -71,7 +71,10 @@ var bcidUUID = null;
                 if(msg.remoteIsHost) {
                     idList.some(id => {
                         if(connectedMembers[id]) {
-                            if(myId === id) isHost = true;
+                            if(myId === id) {
+                                isHost = true;
+                                dispHost.textContent = 'host';
+                            }
                             return true;
                         }
                         return false;
