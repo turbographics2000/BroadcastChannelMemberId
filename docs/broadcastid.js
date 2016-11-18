@@ -57,7 +57,7 @@ var bcidUUID = null;
                     if(!find) {
                         send({
                             bcidcmd: 'limit',
-                            toUUID: msg.toUUID
+                            toUUID: msg.remoteUUID
                         });
                     }
                 }
