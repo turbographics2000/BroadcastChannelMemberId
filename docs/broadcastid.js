@@ -19,7 +19,7 @@ var connectedMembers = {};
         if('toId' in msg && msg.toId !== myId) return;
         switch(msg.bcidcmd) {
             case 'join':
-                var memberCount = Objct.keys(connectedMembers).length;
+                var memberCount = Object.keys(connectedMembers).length;
                 if(memberCount === 0) {
                     myId = idList[0];
                     isHost = true;
