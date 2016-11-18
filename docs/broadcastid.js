@@ -11,7 +11,7 @@ var connectedMembers = {};
         bcidChannel.postMessage(JSON.stringify(msg));
     }
 
-    send({bcidcmd: 'join'});
+    send({bcidcmd: 'join', remoteUUID: uuid});
 
     bcidChannel.addEventListener('message', function(evt) {
         var msg = JSON.parse(evt.data);
@@ -29,7 +29,6 @@ var connectedMembers = {};
                             send({
                                 bcidcmd: 'joinRes',
                                 resId: id,
-                                remoteUUID: uuid, 
                                 toUUID: msg.remoteUUID,
                                 connectedMembers: connectedMembers
                             });
@@ -47,7 +46,6 @@ var connectedMembers = {};
                             send({
                                 bcidcmd: 'joinRes',
                                 resId: id, 
-                                remoteUUID: uuid, 
                                 toUUID: msg.remoteUUID,
                                 connectedMembers: connectedMembers
                             });
