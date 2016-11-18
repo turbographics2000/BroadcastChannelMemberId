@@ -38,6 +38,7 @@ var bcidUUID = null;
                         return false;
                     });
                     isHost = true;
+                    dispHost.textContent = 'host';
                     dispMyId.textContent = myId;
                 } else {
                     var find = idList.some(id => {
