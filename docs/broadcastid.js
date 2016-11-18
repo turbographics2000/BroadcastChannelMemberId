@@ -50,7 +50,7 @@ var connectedMembers = {};
                 break;
             case 'leave':
                 delete connectedMembers[msg.remoteId];
-                if(msg.isHost) {
+                if(msg.remoteIsHost) {
                     idList.some(id => {
                         if(connectedMembers[id]) {
                             if(myId === id) isHost = true;
