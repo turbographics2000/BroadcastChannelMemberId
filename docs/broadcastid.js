@@ -21,15 +21,22 @@ var connectedMembers = {};
             case 'join':
                 var memberCount = Object.keys(connectedMembers).length;
                 if(memberCount === 0) {
-                    myId = idList[0];
+                    myId = myId || idList[0];
+                    idList.some(id => {
+                        if(id !== myId) {
+                            send({
+                                bcidcmd: 'joinRes',
+                                resId: id,
+                                remoteUUID: uuid, 
+                                toUUID: msg.remoteUUID
+                            });
+                            return true;
+                        }
+                        return false;
+                    });
+
                     isHost = true;
                     dispMyId.textContent = myId;
-                    send({
-                        bcidcmd: 'joinRes',
-                        resId: idList[1],
-                        remoteUUID: uuid, 
-                        toUUID: msg.remoteUUID
-                    });
                 } else {
                     idList.some(id => {
                         if(connectedMembers[id]) return;
