@@ -13,7 +13,8 @@ var connectedMembers = {};
 
     send({bcidcmd: 'join'});
 
-    bcidChannel.addEventListener('message', function() {
+    bcidChannel.addEventListener('message', function(evt) {
+        var msg = JSON.parse(evt.data);
         if(!msg.bcidcmd) return;
         if('toId' in msg && msg.toId !== myId) return;
         switch(msg.bcidcmd) {
