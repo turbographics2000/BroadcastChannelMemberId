@@ -75,6 +75,7 @@ var bcidUUID = null;
     });
 
     window.onbeforeunload = function() {
+        if(!myId) return;
         send({
             bcidcmd: 'leave',
             remoteId: myId, 
