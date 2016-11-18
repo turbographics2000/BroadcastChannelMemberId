@@ -40,7 +40,7 @@ var bcidUUID = null;
                     isHost = true;
                     dispMyId.textContent = myId;
                 } else {
-                    idList.some(id => {
+                    var find = idList.some(id => {
                         if(connectedMembers[id]) return false;
                         connectedMembers[id] = msg.remoteUUID;
                         if(isHost) {
@@ -53,6 +53,7 @@ var bcidUUID = null;
                         } 
                         return true;
                     });
+                    console.log('find', find);
                 }
                 break;
             case 'joinRes':
