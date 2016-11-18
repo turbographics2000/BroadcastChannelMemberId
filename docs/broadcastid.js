@@ -83,7 +83,7 @@ var bcidUUID = null;
                 }
                 break;
             case 'limit':
-                dispMyId.text = '満員です';
+                dispMyId.textContent = '満員です';
                 break;
         }
     });
