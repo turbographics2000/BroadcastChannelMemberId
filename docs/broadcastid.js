@@ -1,7 +1,8 @@
 var connectedMembers = {};
+var bcidUUID = null;
 
 (function() {
-    var uuid = UUID.generate({version: 1});
+    var uuid = bcidUUID = UUID.generate({version: 1});
     var bcidChannel = new BroadcastChannel('broadcast-memberid');
     var idList = ['cat', 'dog', 'fish', 'squirrel'];
     var myId = null;
