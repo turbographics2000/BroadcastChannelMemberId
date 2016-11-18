@@ -41,7 +41,7 @@ var bcidUUID = null;
                     dispMyId.textContent = myId;
                 } else {
                     idList.some(id => {
-                        if(connectedMembers[id]) return;
+                        if(connectedMembers[id]) return false;
                         connectedMembers[id] = msg.remoteUUID;
                         if(isHost) {
                             send({
@@ -51,6 +51,7 @@ var bcidUUID = null;
                                 connectedMembers: connectedMembers
                             });
                         } 
+                        return true;
                     });
                 }
                 break;
