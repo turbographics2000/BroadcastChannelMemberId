@@ -45,7 +45,7 @@ var connectedMembers = {};
                 }
                 break;
             case 'joinRes':
-                myId = resId;
+                myId = msg.resId;
                 dispMyId.textContent = myId;
                 break;
             case 'leave':
