@@ -57,7 +57,8 @@ var bcidUUID = null;
                     if(!find) {
                         send({
                             bcidcmd: 'limit',
-                            toUUID: msg.remoteUUID
+                            toUUID: msg.remoteUUID,
+                            connectedMembers: connectedMembers
                         });
                     }
                 }
@@ -84,6 +85,7 @@ var bcidUUID = null;
                 break;
             case 'limit':
                 dispMyId.textContent = '満員です';
+                connectedMembers = msg.connectedMembers;
                 break;
         }
     });
