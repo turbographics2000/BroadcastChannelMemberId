@@ -16,7 +16,7 @@ var connectedMembers = {};
     bcidChannel.addEventListener('message', function(evt) {
         var msg = JSON.parse(evt.data);
         if(!msg.bcidcmd) return;
-        if('toId' in msg && msg.toId !== myId) return;
+        if('toUUID' in msg && msg.toUUID !== uuid) return;
         switch(msg.bcidcmd) {
             case 'join':
                 var memberCount = Object.keys(connectedMembers).length;
