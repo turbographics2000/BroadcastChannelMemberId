@@ -13,7 +13,6 @@ var connectedMembers = {};
 
     send({bcidcmd: 'join'});
 
-    resultMemberId
     bcidChannel.addEventListener('message', function() {
         if(!msg.bcidcmd) return;
         if('toId' in msg && msg.toId !== myId) return;
@@ -23,7 +22,7 @@ var connectedMembers = {};
                 if(memberCount === 0) {
                     myId = idList[0];
                     isHost = true;
-                    resultMemberId.textContent = myId;
+                    dispMyId.textContent = myId;
                     send({
                         bcidcmd: 'joinRes', 
                         remoteUUID: uuid, 
@@ -46,7 +45,6 @@ var connectedMembers = {};
                 break;
             case 'joinRes':
                 myId = resId;
-                resultMemberId = myId;
                 dispMyId.textContent = myId;
                 break;
             case 'leave':
@@ -59,7 +57,6 @@ var connectedMembers = {};
                         }
                         return false;
                     });
-                    
                 }
                 break;
         }
