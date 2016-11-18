@@ -53,7 +53,12 @@ var bcidUUID = null;
                         } 
                         return true;
                     });
-                    console.log('find', find);
+                    if(!find) {
+                        send({
+                            bcidcmd: 'limit',
+                            toUUID: msg.toUUID
+                        });
+                    }
                 }
                 break;
             case 'joinRes':
@@ -72,6 +77,9 @@ var bcidUUID = null;
                         return false;
                     });
                 }
+                break;
+            case 'limit':
+                dispMyId.text = '満員です';
                 break;
         }
     });
