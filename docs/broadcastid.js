@@ -58,7 +58,7 @@ function BroadcastChannelIEx(options) {
     }
 
     bc.onmessage = function(evt) {
-        var msg = JSON.parse(evt);
+        var msg = JSON.parse(evt.data);
         if('toUUID' in msg && msg.toUUID !== uuid) return;
         if('room' in msg && myRoom && msg.room !== myRoom) return;
 
