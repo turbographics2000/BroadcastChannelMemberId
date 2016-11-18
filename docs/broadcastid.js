@@ -25,7 +25,8 @@ var connectedMembers = {};
                     isHost = true;
                     dispMyId.textContent = myId;
                     send({
-                        bcidcmd: 'joinRes', 
+                        bcidcmd: 'joinRes',
+                        resId: idList[1],
                         remoteUUID: uuid, 
                         toUUID: msg.remoteUUID
                     });
