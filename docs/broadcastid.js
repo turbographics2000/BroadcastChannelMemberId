@@ -22,19 +22,21 @@ var connectedMembers = {};
                 var memberCount = Object.keys(connectedMembers).length;
                 if(memberCount === 0) {
                     myId = myId || idList[0];
+                    connectedMembers[myId] = uuid;
                     idList.some(id => {
                         if(id !== myId) {
+                            connectedMembers[id] = msg.remoteUUID;
                             send({
                                 bcidcmd: 'joinRes',
                                 resId: id,
                                 remoteUUID: uuid, 
-                                toUUID: msg.remoteUUID
+                                toUUID: msg.remoteUUID,
+                                connectedMembers: connectedMembers
                             });
                             return true;
                         }
                         return false;
                     });
-
                     isHost = true;
                     dispMyId.textContent = myId;
                 } else {
@@ -46,7 +48,8 @@ var connectedMembers = {};
                                 bcidcmd: 'joinRes',
                                 resId: id, 
                                 remoteUUID: uuid, 
-                                toUUID: msg.remoteUUID
+                                toUUID: msg.remoteUUID,
+                                connectedMembers: connectedMembers
                             });
                         } 
                     });
@@ -55,6 +58,7 @@ var connectedMembers = {};
             case 'joinRes':
                 myId = msg.resId;
                 dispMyId.textContent = myId;
+                connectedMembers = msg.connectedMembers;
                 break;
             case 'leave':
                 delete connectedMembers[msg.remoteId];
