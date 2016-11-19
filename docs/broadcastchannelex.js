@@ -25,11 +25,11 @@ function BroadcastChannelIEx(options) {
         to = to || connectedMembers;
         if(to) {
             if(typeof to === 'string') to = [to];
-            for(var id in connectedMembers) {
+            for(var id in to) {
                 bcSend({
                     eventName: eventName,
                     msg: msg,
-                    toUUID: connectedMembers[id]
+                    toUUID: to[id]
                 });
             }
         } else {
