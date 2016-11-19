@@ -163,4 +163,8 @@ function BroadcastChannelIEx(options) {
         })
     });
 
+    bcSend({
+        cmd: 'join',
+        remoteUUID: uuid
+    })
 }
