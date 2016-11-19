@@ -75,7 +75,7 @@ function BroadcastChannelIEx(options) {
                         if(!myId){
                             myId = idList[0];
                             if(options.onMyId) {
-                                options.onUserId(myId);
+                                options.onMyId(myId);
                             }
                         }
 
