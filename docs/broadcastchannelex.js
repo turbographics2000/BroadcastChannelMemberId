@@ -83,7 +83,7 @@ function BroadcastChannelIEx(options) {
                         idList.some(id => {
                             if(id !== myId) {
                                 connectedMembers[id] = msg.remoteUUID;
-                                send({
+                                bcSend({
                                     cmd: 'joinRes',
                                     resId: id,
                                     toUUID: msg.remoteUUID,
@@ -102,7 +102,7 @@ function BroadcastChannelIEx(options) {
                             if(connectedMembers[id]) return false;
                             connectedMembers[id] = msg.remoteUUID;
                             if(isHost) {
-                                send({
+                                bcSend({
                                     cmd: 'joinRes',
                                     resId: id, 
                                     toUUID: msg.remoteUUID,
@@ -112,7 +112,7 @@ function BroadcastChannelIEx(options) {
                             return true;
                         });
                         if(!find) {
-                            send({
+                            bcSend({
                                 cmd: 'full',
                                 toUUID: msg.remoteUUID,
                                 connectedMembers: connectedMembers
