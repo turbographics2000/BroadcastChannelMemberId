@@ -128,6 +128,7 @@ function BroadcastChannelIEx(options) {
                     connectedMembers = msg.connectedMembers;
                     break;
                 case 'leave':
+                    if(!connectedMembers) return;
                     delete connectedMembers[msg.remoteId];
                     if(msg.remoteIsHost) {
                         idList.some(id => {
