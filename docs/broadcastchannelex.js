@@ -14,7 +14,6 @@ function BroadcastChannelIEx(options) {
     var idList = options.idList;
     var myId = null;
     var isHost = false;
-    var myRoom = null;
     var connectedMembers = null;
     var eventHandlers = {};
 
@@ -60,7 +59,6 @@ function BroadcastChannelIEx(options) {
     bc.onmessage = function(evt) {
         var msg = JSON.parse(evt.data);
         if('toUUID' in msg && msg.toUUID !== uuid) return;
-        if('room' in msg && myRoom && msg.room !== myRoom) return;
 
         if(msg.eventName) {
             if(!eventHandlers[eventName]) return;
@@ -71,10 +69,16 @@ function BroadcastChannelIEx(options) {
         if(msg.cmd) {
             switch(msg.cmd) {
                 case 'join':
-                    if(!msg.room) return;
-                    var memberCount = Object.keys(connectedMembers).length;
-                    if(memberCount === 0) {
-                        myId = myId || idList[0];
+                    if(!connectedMembers) {
+                        connectedMembers = {};
+                        
+                        if(!myId){
+                            myId = idList[0];
+                            if(options.onMyId) {
+                                options.onUserId(myId);
+                            }
+                        }
+
                         connectedMembers[myId] = uuid;
                         idList.some(id => {
                             if(id !== myId) {
@@ -82,7 +86,6 @@ function BroadcastChannelIEx(options) {
                                 send({
                                     cmd: 'joinRes',
                                     resId: id,
-                                    room: msg.room,
                                     toUUID: msg.remoteUUID,
                                     connectedMembers: connectedMembers
                                 });
@@ -91,8 +94,9 @@ function BroadcastChannelIEx(options) {
                             return false;
                         });
                         isHost = true;
-                        dispHost.textContent = 'host';
-                        dispMyId.textContent = myId;
+                        if(options.onHost) {
+                            options.onHost();
+                        }
                     } else {
                         var find = idList.some(id => {
                             if(connectedMembers[id]) return false;
@@ -101,7 +105,6 @@ function BroadcastChannelIEx(options) {
                                 send({
                                     cmd: 'joinRes',
                                     resId: id, 
-                                    room: msg.room,
                                     toUUID: msg.remoteUUID,
                                     connectedMembers: connectedMembers
                                 });
@@ -110,7 +113,7 @@ function BroadcastChannelIEx(options) {
                         });
                         if(!find) {
                             send({
-                                cmd: 'limit',
+                                cmd: 'full',
                                 toUUID: msg.remoteUUID,
                                 connectedMembers: connectedMembers
                             });
@@ -119,10 +122,10 @@ function BroadcastChannelIEx(options) {
                     break;
                 case 'joinRes':
                     myId = msg.resId;
-                    myRoom = msg.room;
-                    dispMyId.textContent = myId;
+                    if(options.onMyId) {
+                        options.onMyId(myId);
+                    }
                     connectedMembers = msg.connectedMembers;
-                    if(options.onJoin) options.onJoin(myRoom);
                     break;
                 case 'leave':
                     delete connectedMembers[msg.remoteId];
@@ -131,7 +134,9 @@ function BroadcastChannelIEx(options) {
                             if(connectedMembers[id]) {
                                 if(myId === id) {
                                     isHost = true;
-                                    dispHost.textContent = 'host';
+                                    if(options.onHost) {
+                                        options.onHost();
+                                    }
                                 }
                                 return true;
                             }
@@ -139,8 +144,10 @@ function BroadcastChannelIEx(options) {
                         });
                     }
                     break;
-                case 'limit':
-                    dispMyId.textContent = '満員です';
+                case 'full':
+                    if(this.options.onFull) {
+                        this.options.onFull();
+                    }
                     connectedMembers = msg.connectedMembers;
                     break;
             }
@@ -148,6 +155,7 @@ function BroadcastChannelIEx(options) {
     };
 
     window.addEventListener('beforeunload', _ => {
+        if(!myId) return;
         bcSend({
             cmd: 'leave',
             remoteId: myId, 
@@ -155,10 +163,4 @@ function BroadcastChannelIEx(options) {
         })
     });
 
-    if(options.room) {
-        bcSend({
-            cmd: 'join',
-            remoteUUID: uuid
-        })
-    }
 }

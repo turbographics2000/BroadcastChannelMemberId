@@ -18,8 +18,9 @@
                 onMyId: myId => {
                     dispMyId.textContent = myId;
                 },
-                onJoin: room => {
-                    dispRoom.textContent = room;
+                onHost: _ => {
+                    dispHost.textContent = 'Host';
+                    docment.title = '★' + document.title;
                 }
             });
 
