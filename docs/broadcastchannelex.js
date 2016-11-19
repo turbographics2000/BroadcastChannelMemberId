@@ -146,8 +146,8 @@ function BroadcastChannelIEx(options) {
                     }
                     break;
                 case 'full':
-                    if(this.options.onFull) {
-                        this.options.onFull();
+                    if(options.onFull) {
+                        options.onFull();
                     }
                     connectedMembers = msg.connectedMembers;
                     break;
