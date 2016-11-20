@@ -14,19 +14,26 @@
         <script src="uuid.core.js"></script>
         <script src="broadcastchannelex_class.js"></script>
         <script>
-            var bcex = new bcex({
-                room: 'TestRoom',
+            let bcex = new BroadcastChannelEx({
+                idList: ['cat', 'dog'],
                 onMyId: myId => {
                     dispMyId.textContent = myId;
                 },
+                onJoinMember: memberId => {
+
+                },
+                onLeaveMember: memberId => {
+
+                },
                 onHost: _ => {
-                    dispHost.textContent = 'Host';
-                    document.title = '★' + document.title;
+                    dispHost.textContent = 'Host'
+                    document.title = '★' + document.title
                 },
                 onFull: _ => {
-                    dispFull.textContent = '満員';
+                    dispFull.textContent = '満員'
                 }
-            });
+            })
+            bcex.join()
 
         </script>
     </body>

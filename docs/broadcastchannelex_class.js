@@ -2,7 +2,7 @@ const eventHandlers = Symbol('eventHandlers')
 const bcSend = Symbol('bcSend')
 const onmessage = Symbol('onmessage')
 
-export default class bcex {
+class BroadcastChannelEx {
     constructor(options) {
         this.options = Object.assign({
             channel: 'BroadcastChannelEx',
@@ -13,11 +13,11 @@ export default class bcex {
             onLeaveMember: _ => {},
             onFull: _ => {}
         }, options)
-        this.connectedMembers = {}
+        this.connectedMembers = null
         this.uuid = UUID.generate({version: 1})
         this.bc = new BroadcastChannel(this.options.channel)
         this.myId = null
-        this.isHost = false
+        this._isHost = false
         this[eventHandlers] = null
         this[bcSend] = msg => {
             this.bc.postMessage(JSON.stringify(msg))
@@ -32,14 +32,9 @@ export default class bcex {
             })
         })
 
-        // bcSend({
-        //     cmd: 'join',
-        //     remoteUUID: uuid
-        // })
-
         this.bc.onmessage = evt => {
             let msg = Object.assign({cmd: '-'}, JSON.parse(evt.data))
-            if('toUUID' in msg && msg.toUUID !== uuid) return
+            if('toUUID' in msg && msg.toUUID !== this.uuid) return
 
             if(msg.eventName) {
                 if(!this[eventHandlers][eventName]) return
@@ -50,7 +45,8 @@ export default class bcex {
             switch(msg.cmd) {
                 case 'join':
                     if(this.connectedMembers) {
-                        let resId = idList.filter(id => !!this.connectedMembers[id])[0]
+                        let resId = this.options.idList.filter(id => !this.connectedMembers[id])[0]
+                        this.options.onJoinMember(resId);
                         if(resId) {
                             this.connectedMembers[resId] = msg.remoteUUID
                             if(!this.isHost) return
@@ -69,11 +65,12 @@ export default class bcex {
                         }
                     } else {
                         this.connectedMembers = {}
-                        this.myId = this.myId || idList[0]
+                        this.myId = this.myId || this.options.idList[0]
                         this.options.onMyId(this.myId)
-                        connectedMembers[this.myId] = this.uuid
-                        let resId = idList.filter(id => id !== this.myId)[0]
-                        connectedMembers[resId] = msg.remoteUUID
+                        this.connectedMembers[this.myId] = this.uuid
+                        let resId = this.options.idList.filter(id => id !== this.myId)[0]
+                        this.options.onJoinMember(resId)
+                        this.connectedMembers[resId] = msg.remoteUUID
                         this[bcSend]({
                             cmd: 'joinRes',
                             resId: resId,
@@ -81,25 +78,24 @@ export default class bcex {
                             connectedMembers: this.connectedMembers
                         })
                         this.isHost = true
-                        this.options.onHost()
                     }
                     break
 
                 case 'joinRes':
                     this.myId = msg.resId
-                    this.options.onMyId(myId)
+                    this.options.onMyId(this.myId)
                     this.connectedMembers = msg.connectedMembers
                     break
                 
                 case 'leave':
                     if(!this.connectedMembers) return
                     delete this.connectedMembers[msg.remoteId]
+                    this.options.onLeaveMember(msg.remoteId)
                     if(!Object.keys(this.connectedMembers).length) this.connectedMembers = null
                     if(msg.remoteIsHost) {
-                        idList.some(id => {
-                            if(this.connectedMembers[id] && this.myId === id) {
-                                this.isHost = true
-                                this.options.onHost()
+                        this.options.idList.some(id => {
+                            if(this.connectedMembers[id]) {
+                                if(this.myId === id) this.isHost = true
                                 return true
                             }
                             return false
@@ -112,6 +108,28 @@ export default class bcex {
                     this.connectedMembers = msg.connectedMembers
                     break
             }
+        }
+    }
+
+    get isHost() {
+        return this._isHost;
+    }
+
+    set isHost(val) {
+        if(!this._isHost && val) {
+            this._isHost = val;
+            this.options.onHost();
+        }
+    }
+
+    get myId() {
+        return this._myId;
+    }
+
+    set myId(val) {
+        if(!this._myId && val) {
+            this._myId = val;
+            this.options.onMyId();
         }
     }
 
