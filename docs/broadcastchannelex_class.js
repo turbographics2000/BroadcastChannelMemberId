@@ -10,6 +10,7 @@ export default class bcex {
             onMyId: _ => {},
             onHost: _ => {},
             onJoinMember: _ => {},
+            onLeaveMember: _ => {},
             onFull: _ => {}
         }, options)
         this.connectedMembers = {}
@@ -24,12 +25,12 @@ export default class bcex {
 
         window.addEventListener('beforeunload', _ => {
             if(!this.myId) return
-            bcSend({
+            this[bcSend]({
                 cmd: 'leave',
-                remoteId: this.myId, 
+                remoteId: this.myId,
                 remoteIsHost: this.isHost
             })
-        });
+        })
 
         // bcSend({
         //     cmd: 'join',
@@ -48,82 +49,85 @@ export default class bcex {
 
             switch(msg.cmd) {
                 case 'join':
-                    if(!this.connectedMembers) {
+                    if(this.connectedMembers) {
+                        let resId = idList.filter(id => !!this.connectedMembers[id])[0]
+                        if(resId) {
+                            this.connectedMembers[resId] = msg.remoteUUID
+                            if(!this.isHost) return
+                            this[bcSend]({
+                                cmd: 'joinRes',
+                                resId: resId,
+                                toUUID: msg.remoteUUID,
+                                connectedMembers: this.connectedMembers
+                            })
+                        } else {
+                            this[bcSend]({
+                                cmd: 'full',
+                                toUUID: msg.remoteUUID,
+                                connectedMembers: this.connectedMembers
+                            })
+                        }
+                    } else {
                         this.connectedMembers = {}
                         this.myId = this.myId || idList[0]
-                        this.options.onMyId(myId)
-                        connectedMembers[myId] = this.uuid
+                        this.options.onMyId(this.myId)
+                        connectedMembers[this.myId] = this.uuid
                         let resId = idList.filter(id => id !== this.myId)[0]
                         connectedMembers[resId] = msg.remoteUUID
-                        bcSend({
+                        this[bcSend]({
                             cmd: 'joinRes',
                             resId: resId,
                             toUUID: msg.remoteUUID,
-                            connectedMembers: connectedMembers
+                            connectedMembers: this.connectedMembers
                         })
                         this.isHost = true
                         this.options.onHost()
-                    } else {
-                        let resId = idList.filter(id => !!connectedMembers[id])[0]
-                        if(resId) {
-                            connectedMembers[resId] = msg.remoteUUID
-                            if(this.isHost) {
-                                bcSend({
-                                    cmd: 'joinRes',
-                                    resId: resId, 
-                                    toUUID: msg.remoteUUID,
-                                    connectedMembers: connectedMembers
-                                })
-                            }
-                        } else {
-                            bcSend({
-                                cmd: 'full',
-                                toUUID: msg.remoteUUID,
-                                connectedMembers: connectedMembers
-                            });
-                        }
                     }
-                    break;
+                    break
 
                 case 'joinRes':
                     this.myId = msg.resId
                     this.options.onMyId(myId)
-                    connectedMembers = msg.connectedMembers
-                    break;
+                    this.connectedMembers = msg.connectedMembers
+                    break
                 
                 case 'leave':
-                    if(!connectedMembers) return
-                    delete connectedMembers[msg.remoteId]
+                    if(!this.connectedMembers) return
+                    delete this.connectedMembers[msg.remoteId]
+                    if(!Object.keys(this.connectedMembers).length) this.connectedMembers = null
                     if(msg.remoteIsHost) {
                         idList.some(id => {
-                            if(connectedMembers[id] && myId === id) {
-                                isHost = true;
-                                this.options.onHost();
-                                return true;
+                            if(this.connectedMembers[id] && this.myId === id) {
+                                this.isHost = true
+                                this.options.onHost()
+                                return true
                             }
-                            return false;
-                        });
+                            return false
+                        })
                     }
-                    break;
+                    break
                 
                 case 'full':
-                    this.options.onFull();
-                    connectedMembers = msg.connectedMembers;
-                    break;
+                    this.options.onFull()
+                    this.connectedMembers = msg.connectedMembers
+                    break
             }
         }
+    }
+
+    join() {
+        this[bcSend]({
+            cmd: 'join',
+            remoteUUID: this.uuid
+        })
     }
 
     emit(eventName, msg, to) {
         to = to || this.connectedMembers
         if(to) {
             if(typeof to === 'string') to = [to]
-            for(let id in to) {
-                bcSend({
-                    eventName: eventName,
-                    msg: msg,
-                    toUUID: to[id]
-                });
+            for(let toUUID of to) {
+                bcSend({eventName, msg, toUUID})
             }
         } else {
             bcSend({eventName, msg})
@@ -131,18 +135,18 @@ export default class bcex {
     }
 
     on(eventName, eventHandler) {
-        eventHandlers[eventName] = eventHandlers[eventName] || []
-        eventHandlers[eventName].push(eventHandler)
+        this[eventHandlers][eventName] = this[eventHandlers][eventName] || []
+        this[eventHandlers][eventName].push(eventHandler)
     }
 
     off(eventName, eventHandler) {
-        if(!eventHandlers[eventName]) return
+        if(!this[eventHandlers][eventName]) return
         if(eventHandler) {
-            let idx = eventHandlers[eventName].indexOf(eventHandler)
+            let idx = this[eventHandlers][eventName].indexOf(eventHandler)
             if(idx === -1) return
-            eventHandlers[eventName].splice(idx, 1)
+            this[eventHandlers][eventName].splice(idx, 1)
         } else {
-            delete eventHandlers[eventName]
+            delete this[eventHandlers][eventName]
         }
     }
 }
