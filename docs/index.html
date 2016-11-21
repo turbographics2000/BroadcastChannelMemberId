@@ -15,12 +15,10 @@
         <script src="broadcastchannelex_class.js"></script>
         <script>
             let bcex = new BroadcastChannelEx({
-                idList: ['cat', 'dog'],
                 onMyId: myId => {
                     dispMyId.textContent = myId;
                 },
                 onJoinMember: memberId => {
-
                 },
                 onLeaveMember: memberId => {
 
@@ -33,6 +31,7 @@
                     dispFull.textContent = '満員'
                 }
             })
+
             bcex.join()
 
         </script>

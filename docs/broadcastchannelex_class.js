@@ -46,7 +46,6 @@ class BroadcastChannelEx {
                 case 'join':
                     if(this.connectedMembers) {
                         let resId = this.options.idList.filter(id => !this.connectedMembers[id])[0]
-                        this.options.onJoinMember(resId);
                         if(resId) {
                             this.connectedMembers[resId] = msg.remoteUUID
                             if(!this.isHost) return
@@ -56,6 +55,7 @@ class BroadcastChannelEx {
                                 toUUID: msg.remoteUUID,
                                 connectedMembers: this.connectedMembers
                             })
+                            this.options.onJoinMember(resId);
                         } else {
                             this[bcSend]({
                                 cmd: 'full',
@@ -66,10 +66,8 @@ class BroadcastChannelEx {
                     } else {
                         this.connectedMembers = {}
                         this.myId = this.myId || this.options.idList[0]
-                        this.options.onMyId(this.myId)
                         this.connectedMembers[this.myId] = this.uuid
                         let resId = this.options.idList.filter(id => id !== this.myId)[0]
-                        this.options.onJoinMember(resId)
                         this.connectedMembers[resId] = msg.remoteUUID
                         this[bcSend]({
                             cmd: 'joinRes',
@@ -78,19 +76,20 @@ class BroadcastChannelEx {
                             connectedMembers: this.connectedMembers
                         })
                         this.isHost = true
+                        this.options.onJoinMember(resId)
+                        this.options.onMyId(this.myId)
                     }
                     break
 
                 case 'joinRes':
                     this.myId = msg.resId
-                    this.options.onMyId(this.myId)
                     this.connectedMembers = msg.connectedMembers
+                    this.options.onMyId(this.myId)
                     break
                 
                 case 'leave':
                     if(!this.connectedMembers) return
                     delete this.connectedMembers[msg.remoteId]
-                    this.options.onLeaveMember(msg.remoteId)
                     if(!Object.keys(this.connectedMembers).length) this.connectedMembers = null
                     if(msg.remoteIsHost) {
                         this.options.idList.some(id => {
@@ -101,11 +100,12 @@ class BroadcastChannelEx {
                             return false
                         })
                     }
+                    this.options.onLeaveMember(msg.remoteId)
                     break
                 
                 case 'full':
-                    this.options.onFull()
                     this.connectedMembers = msg.connectedMembers
+                    this.options.onFull()
                     break
             }
         }
